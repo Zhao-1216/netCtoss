@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.AccountMapper">
+
+    <resultMap id="AccountMap" type="com.netctoss_springboot.pojo.Account">
+        <id column="account_id" property="accountId"/>
+        <result column="recommender_id" property="recommenderId"/>
+        <result column="login_name" property="loginName"/>
+        <result column="login_passwd" property="loginPasswd"/>
+        <result column="status" property="status"/>
+        <result column="create_date" property="createDate"/>
+        <result column="pause_date" property="pauseDate"/>
+        <result column="close_date" property="closeDate"/>
+        <result column="real_name" property="realName"/>
+        <result column="idcard_no" property="idCardNo"/>
+        <result column="birthdate" property="birthDate"/>
+        <result column="gender" property="gender"/>
+        <result column="occupation" property="occupation"/>
+        <result column="telephone" property="telephone"/>
+        <result column="email" property="email"/>
+        <result column="mailaddress" property="mailAddress"/>
+        <result column="zipcode" property="zipCode"/>
+        <result column="qq" property="qq"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_login_ip" property="lastLoginIp"/>
+        <result column="recommendIdCardNo" property="recommendIdCardNo"/>
+    </resultMap>
+    <select id="findByAccountId" resultMap="AccountMap">
+        select a.account_id,a.real_name,a.idcard_no,a.login_name,a.telephone,a.recommender_id,
+        b.idcard_no as recommendIdCardNo,a.status,a.create_date,a.pause_date,a.close_date,a.last_login_time,
+        a.last_login_ip,a.birthdate,a.email,a.occupation,a.gender,a.mailaddress,a.zipcode,a.qq
+        from account a
+        left join account b on a.recommender_id = b.account_id
+        where a.account_id = #{accountId};
+    </select>
+    <sql id="accountlist">
+        account_id,real_name,idcard_no,login_name,status,create_date,last_login_time
+    </sql>
+
+    <select id="findAll" resultMap="AccountMap">
+        select
+        <include refid="accountlist"></include>
+        from account
+        <where>
+            <if test="idCardNo != null and idCardNo != '' ">
+                and idcard_no =#{idCardNo}
+            </if>
+            <if test="realName != null and realName != '' ">
+                and real_name =#{realName}
+            </if>
+            <if test=" loginName != null and loginName != '' ">
+                and login_name =#{loginName}
+            </if>
+            <if test="status != null and status != '-1' ">
+                and status =#{status}
+            </if>
+        </where>
+        order by account_id
+    </select>
+
+    <update id="updateAccount">
+        update account a
+        left join account b on a.recommender_id = b.account_id
+        set a.real_name=#{realName},a.idcard_no=#{idCardNo},a.login_name=#{loginName},
+        a.login_passwd=#{loginPasswd},a.telephone=#{telephone}, b.idcard_no =#{recommendIdCardNo},
+        a.birthdate=#{birthDate},a.email=#{email},a.occupation=#{occupation},a.gender=#{gender},a.mailaddress=#{mailAddress},a.zipcode=#{zipCode},a.qq=#{qq}
+        where a.account_id = #{accountId};
+    </update>
+
+    <update id="changeStatus" parameterType="integer">
+        update account
+        set status = CASE
+        WHEN status = 1 THEN 0
+        ELSE 1
+        END,
+        create_date = CASE
+        WHEN status = 1 THEN CURRENT_TIMESTAMP(0)
+        ELSE NULL
+        END,
+        pause_date = CASE
+        WHEN status = 0 THEN CURRENT_TIMESTAMP(0)
+        ELSE NULL
+        END
+        where account_id = #{accountId};
+    </update>
+
+    <update id="deleteAccount" parameterType="integer">
+        update account
+        set status = '2',
+        close_date=CURRENT_TIMESTAMP(0)
+        where account_id = #{accountId};
+    </update>
+
+    <insert id="addAccount" parameterType="object">
+        insert into account(real_name,idcard_no,login_name,login_passwd,telephone,recommender_id,
+        birthdate,email,occupation,gender,mailaddress,zipcode,qq)
+        values(#{realName},#{idCardNo},#{loginName},#{loginPasswd},#{telephone},#{recommenderId},#{birthDate},#{email},#{occupation},#{gender},#{mailAddress},#{zipCode},#{qq})
+    </insert>
+
+
+</mapper>

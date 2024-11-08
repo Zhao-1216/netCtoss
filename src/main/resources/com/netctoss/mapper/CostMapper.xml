@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.CostMapper">
+    <resultMap id="costMap" type="com.netctoss_springboot.pojo.Cost">
+        <id column="cost_id" property="costId"/>
+        <result column="name" property="name"/>
+        <result column="base_duration" property="baseDuration"/>
+        <result column="base_cost" property="baseCost"/>
+        <result column="unit_cost" property="unitCost"/>
+        <result column="status" property="status"/>
+        <result column="descr" property="descr"/>
+        <result column="creatime" property="creatime"/>
+        <result column="startime" property="startime"/>
+        <result column="cost_type" property="costType"/>
+    </resultMap>
+    <sql id="costlist">
+        cost_id,name,base_duration,base_cost,unit_cost,
+        status,descr,creatime,startime,cost_type
+    </sql>
+    <select id="findByCostId" resultMap="costMap">
+        select cost_id,name,base_duration,base_cost,unit_cost,
+            status,descr,creatime,startime,cost_type
+        from cost
+        where cost_id = #{costId}
+    </select>
+
+    <select id="findAll" resultMap="costMap" >
+        select
+        <include refid="costlist"></include>
+        from cost where status!=2 order by cost_id
+    </select>
+
+
+    <update id="updateCost" parameterType="object">
+        update cost
+        set name = #{name},base_duration = #{baseDuration},base_cost = #{baseCost},unit_cost = #{unitCost},
+        descr = #{descr},startime = #{startime},cost_type = #{costType}
+        where cost_id = #{costId}
+    </update>
+
+    <update id="deleteCost" parameterType="integer">
+        update cost
+        set status = '2'
+        where cost_id = #{costId}
+    </update>
+
+    <update id="changeStatus" parameterType="integer">
+        update cost
+        set status = CASE
+        WHEN status = 1 THEN 0
+        ELSE 1
+        END,
+        startime = CASE
+        WHEN status = 1 THEN CURRENT_TIMESTAMP(0)
+        ELSE NULL
+        END
+        where cost_id = #{id};
+    </update>
+
+
+    <insert id="addCost" >
+        insert into cost(name,base_duration,base_cost,unit_cost,descr,creatime,cost_type,status)
+        values(#{name},#{baseDuration},#{baseCost},#{unitCost},#{descr},CURRENT_TIMESTAMP(0),#{costType},0)
+    </insert>
+
+</mapper>

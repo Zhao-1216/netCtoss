@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.RoleMapper">
+    <resultMap id="RoleMap" type="com.netctoss_springboot.pojo.Role">
+        <id property="roleId" column="role_id"/>
+        <result property="roleName" column="roleName"/>
+<!--        <result property="privilegeIds" column="privilege_id"/>-->
+        <result property="privilegeName" column="privilegeName"/>
+
+    </resultMap>
+
+    <select id="findAll" resultMap="RoleMap">
+        select
+        r.role_id,r.role_name as roleName,
+        GROUP_CONCAT(p.privilege_name) as privilegeName
+        from role_privilege rp
+        right join role_info r on r.role_id = rp.role_id
+        left join privilege_info p on p.privilege_id = rp.privilege_id
+        group by r.role_id
+    </select>
+
+
+
+
+
+    <select id="findByRoleId" resultMap="RoleMap">
+        select r.role_name as roleName,
+        GROUP_CONCAT(p.privilege_name) as privilegeName
+        from role_privilege rp
+        right join role_info r on r.role_id = rp.role_id
+        left join privilege_info p on p.privilege_id = rp.privilege_id
+        where r.role_id = #{roleId}
+        group by r.role_id
+    </select>
+
+
+    
+
+    <insert id="addRole" parameterType="com.netctoss_springboot.pojo.Role"  useGeneratedKeys="true" keyProperty="roleId" keyColumn="role_id">
+        insert into role_info(role_name)
+        values(#{roleName})
+    </insert>
+
+    <insert id="addPrivilegeName">
+        insert into role_privilege(role_id,privilege_id)
+        <foreach  index="index" collection="b"  item="c" open="(" separator="),(" close=")">
+            #{a}, #{c}
+        </foreach>
+    </insert>
+
+
+    <resultMap id="RoleMap2" type="com.netctoss_springboot.pojo.Role">
+        <id property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+        <collection property="privilegeIds" select="com.ssm.netctoss.mapper.PrivilegeMapper.findBySecondStep" column="role_id"/>
+    </resultMap>
+
+    <select id="findRoleAndPri" resultMap="RoleMap2">
+        select role_id,role_name
+        from role_info
+        where role_id = #{roleId}
+    </select>
+
+
+    <update id="updateRole" parameterType="object">
+        update role_privilege
+        set privilege_id
+    </update>
+
+
+
+
+
+
+    <delete id="deleteRole" parameterType="integer">
+        delete from role_info
+        where role_id = #{roleId}
+    </delete>
+
+
+</mapper>

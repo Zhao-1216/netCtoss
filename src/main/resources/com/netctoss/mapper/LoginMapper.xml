@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.LoginMapper">
+
+    <resultMap id="loginMap" type="com.netctoss_springboot.pojo.Admin">
+        <id property="adminId" column="admin_id"/>
+        <result property="adminCode" column="admin_code"/>
+        <result property="adminName" column="admin_name"/>
+        <result property="telephone" column="telephone"/>
+        <result property="email" column="email"/>
+        <result property="enrollDate" column="enrolldate"/>
+        <result property="roleName" column="role_name"/>
+    </resultMap>
+
+    <select id="findLoginInfoByAdminId" resultMap="loginMap">
+        select admin_code,admin_name,telephone,email,enrolldate,
+        GROUP_CONCAT(role_name) as roleName
+        from admin_info ai
+        left join admin_role ar on ai.admin_id=ar.admin_id
+        left join role_info ri on ar.role_id=ri.role_id
+        where ai.admin_id=#{adminId}
+    </select>
+
+    <update id="updateInfo" parameterType="object">
+        update admin_info
+        set admin_name=#{adminName},telephone=#{telephone},email=#{email}
+    </update>
+
+
+
+
+</mapper>

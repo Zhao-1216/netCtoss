@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.AdminMapper">
+    <resultMap id="adminMap" type="com.netctoss_springboot.pojo.Admin">
+        <id column="admin_id" property="adminId"/>
+        <result column="admin_code" property="adminCode"/>
+        <result column="password" property="password"/>
+        <result column="admin_name" property="adminName"/>
+        <result column="telephone" property="telephone"/>
+        <result column="email" property="email"/>
+        <result column="enrolldate" property="enrollDate"/>
+        <result column="role_id" property="roleId"/>
+        <result column="roleName" property="roleName"/>
+        <result column="privilege_id" property="privilegeId"/>
+    </resultMap>
+
+
+    <resultMap id="adminMap2" type="com.netctoss_springboot.pojo.Admin">
+        <id column="admin_id" property="adminId"/>
+        <result column="admin_code" property="adminCode"/>
+        <result column="password" property="password"/>
+        <result column="admin_name" property="adminName"/>
+        <result column="telephone" property="telephone"/>
+        <result column="email" property="email"/>
+        <result column="enrolldate" property="enrollDate"/>
+        <result column="role_id" property="roleId"/>
+        <result column="roleName" property="roleName"/>
+        <collection property="privilegeId" select="com.ssm.netctoss.mapper.PrivilegeMapper.findPrivilegeId" column="role_id"/>
+    </resultMap>
+    <select id="findAll" resultMap="adminMap">
+        select ai.admin_id,admin_name,admin_code,telephone,email,enrolldate,
+        GROUP_CONCAT(ri.role_name) as roleName,
+        GROUP_CONCAT(rp.privilege_id) as privilegeId
+        from admin_info ai
+        left join admin_role ar on ai.admin_id = ar.admin_id
+        left join role_info ri on ar.role_id = ri.role_id
+        left join role_privilege rp on ar.role_id = rp.role_id
+        <where>
+            <if test="privilegeId != null and privilegeId != '-1' ">
+                and privilege_id =#{privilegeId}
+            </if>
+            <if test=" roleName != null and roleName != '' ">
+                and role_name =#{roleName}
+            </if>
+        </where>
+        group by ai.admin_id
+    </select>
+
+    <select id="findByAdminId" resultMap="adminMap">
+        select admin_name,admin_code,telephone,email,
+        GROUP_CONCAT(ri.role_name) as roleName
+        from admin_info ai
+        left join admin_role ar on ai.admin_id = ar.admin_id
+        left join role_info ri on ar.role_id = ri.role_id
+        where ai.admin_id = #{adminId}
+        group by ai.admin_id
+    </select>
+
+
+    <update id="updateAdmin" parameterType="object">
+        update admin_info ai
+        left join admin_role ar on ai.admin_id = ar.admin_id
+        set ai.admin_name = #{adminName}, telephone = #{telephone},
+        email = #{email}, ar.role_id = #{roleId}
+        where ai.admin_id = #{adminId}
+    </update>
+
+
+
+    <insert id="addAdmin" parameterType="object">
+        insert into admin_info(admin_name,admin_code,password,telephone,email)
+        values(#{adminName},#{adminCode},#{password},#{telephone},#{email})
+    </insert>
+
+
+
+
+    <delete id="deleteAdmin" parameterType="integer">
+        delete from admin_info where admin_id = #{adminId}
+    </delete>
+
+
+
+</mapper>

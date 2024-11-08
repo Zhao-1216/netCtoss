@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netctoss_springboot.mapper.PrivilegeMapper">
+
+    <resultMap id="privilegeMap" type="com.netctoss_springboot.pojo.Privilege">
+        <id property="privilegeId" column="privilege_id"/>
+    </resultMap>
+    <select id="findBySecondStep" resultMap="privilegeMap" >
+        select privilege_id
+        from role_privilege
+        where role_id = #{roleId}
+    </select>
+    
+
+</mapper>
